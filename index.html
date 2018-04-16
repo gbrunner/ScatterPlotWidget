@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Raster Layer</title>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.14/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="http://js.arcgis.com/3.14/esri/css/esri.css">
+    <link rel="stylesheet" href="style.css" media="screen">
+    <style>
+        html, body {
+            width: 98%;
+            height: 98%;
+            margin: 0 1%;
+            padding: 10px 0 0 0;
+        }
+
+        #mapCanvas {
+            border: solid 1px #888;
+            padding: 0;
+        }
+
+        #status {
+            background-color: #000;
+            color: #FFF;
+            border: solid 1px #FFF;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            border-radius: 5px;
+            padding: 3px;
+        }
+
+        #floatingWindow {
+            position: absolute;
+            right: 25px;
+            top: 15px;
+            z-index: 998;
+            width: 310px;
+            -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            background: white;
+            border: solid 3px #028482;
+            color: #000000;
+            padding: 10px;
+            font-family: "Tahoma";
+            color: black;
+            text-align: left;
+        }
+
+        .shadow {
+            -moz-border-radius: 6px;
+            -webkit-border-radius: 6px;
+            border-radius: 6px;
+            -moz-box-shadow: 0 6px 3px -3px #bdbdbd;
+            -webkit-box-shadow: 0 6px 3px -3px #bdbdbd;
+            box-shadow: 0 6px 3px -3px #bdbdbd;
+            background-color: #FFF;
+            padding: 8px;
+        }
+
+        #footer {
+            height: 80px;
+            padding: 10px;
+        }
+    </style>
+
+    <script>
+        var dojoConfig = {
+                        async: true,
+                        isDebug: true,
+                        packages: [
+                        {
+                          name: "scatterPlotWidget",
+                          location: location.pathname.replace(/\/[^/]+$/, "") + "ScatterPlotWidget"
+                        },
+                ]
+        };
+    </script>
+    <script type="text/javascript" src="http://js.arcgis.com/3.14/"></script>
+    <script>
+        require([
+          "esri/map",
+          "esri/domUtils",
+          "dojo/parser", "dojo/dom", "dojo/io-query", "dojo/_base/url", "dojo/on",
+          "esri/layers/RasterLayer", "esri/layers/ImageServiceParameters", "esri/layers/RasterFunction",
+          "scatterPlotWidget/Widget", "esri/geometry/Extent", "esri/SpatialReference",
+          "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojo/domReady!"
+        ], function (
+          Map,
+          domUtils,
+          parser, dom, ioQuery, Url, on,
+          RasterLayer, ImageServiceParameters, RasterFunction,
+          spWidget, Extent, SpatialReference, BorderContainer, ContentPane
+        ) {
+            parser.parse();
+            // does the browser support canvas? 
+            var canvasSupport = supports_canvas();
+
+            function getParameter(name) {
+              name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+              var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                  results = regex.exec(location.search);
+              return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+            }
+
+            var isUrl = "http://landsat.arcgis.com/arcgis/rest/services/LandsatGLS/MS/ImageServer"
+			//"http://wju.esri.com:6080/arcgis/rest/services/demo/LandsatPortland/ImageServer";
+            var renderingRule = "{\"rasterFunction\":\"ExtractBand\",\"rasterFunctionArguments\":{\"bandIds\":[3,2,1]}}"
+
+            var corsEnabledServers, imageServiceAuthority, onceDone;
+            imageServiceAuthority = new Url(isUrl).authority;
+            corsEnabledServers = esriConfig.defaults.io.corsEnabledServers;
+            if (!corsEnabledServers.some(function (x) {
+              return x === imageServiceAuthority;
+            })) {
+                corsEnabledServers.push(imageServiceAuthority);
+            }
+            var initExtent = new Extent(-13900962.863602027,5520186.843130505,-13337774.839197122,5806978.573256347, new SpatialReference(3857));
+
+            var map = new Map("mapCanvas", {
+                extent: initExtent,
+                basemap:"topo"
+            });
+
+            map.on("update-start", function () {
+                domUtils.show(dom.byId("status"));
+            });
+            
+            map.on("update-end", function () {
+                domUtils.hide(dom.byId("status"));
+            });
+
+            map.on("load", mapLoaded);
+
+            function mapLoaded() {
+                if (canvasSupport) {
+                    var widget;
+                    var params = new ImageServiceParameters();
+                    if (renderingRule) {
+                      params.renderingRule = new RasterFunction(JSON.parse(renderingRule));
+                    }
+                    var rasterLayer = new RasterLayer(isUrl, {
+                        imageServiceParameters: params,
+                        opacity: 1, 
+                        compressionTolerance:0
+                    });
+                    map.addLayer(rasterLayer);
+                    rasterLayer.on("update-end", function () {
+					            if (!widget) {
+					              widget = new spWidget({ layer : rasterLayer});
+					              var widgetPanel = dom.byId("scatterPlotDiv");
+					              widget.placeAt(widgetPanel);
+					            } else {
+					              widget.set("layer", rasterLayer);
+					            }
+                    });
+
+                } else {
+                    alert("This browser doesn't support canvas. Visit <a target='_blank' href='http://www.caniuse.com/#search=canvas'>caniuse.com</a> for supported browsers");
+                }
+            }
+
+            function supports_canvas() {
+                return true;
+            }
+        });
+    </script>
+</head>
+
+<body class="claro">
+    <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline', gutters:false"
+         style="width: 100%; height: 100%; margin: 0;">
+        <div id="mapCanvas" class='shadow' data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'"
+             style="height: 100%;">
+            <div id="status" style="position: absolute; right: 10px; top: 10px; z-index: 99;">
+                Loading...
+            </div>
+            <div id="floatingWindow">
+                <div id="scatterPlotDiv"> </div>
+                <div>
+                    How to use:<br />
+                    0. Only tested in Chrome.<br />
+                    1. In scatterplot, hold down left mouse button to draw freehand curve.<br />          
+                    2. In scatterplot, left click to reset.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
