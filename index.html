@@ -103,7 +103,8 @@
               return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
             }
 
-            var isUrl = "https://landsat.arcgis.com/arcgis/rest/services/LandsatGLS/MS/ImageServer"
+            var isUrl = "https://usfs-imagery-dev.esriemcs.com/arcgis/rest/services/Hosted/LCMS_Georgia_201804092114099/ImageServer"
+		//"https://landsat.arcgis.com/arcgis/rest/services/LandsatGLS/MS/ImageServer"
 			//"http://wju.esri.com:6080/arcgis/rest/services/demo/LandsatPortland/ImageServer";
             var renderingRule = "{\"rasterFunction\":\"ExtractBand\",\"rasterFunctionArguments\":{\"bandIds\":[3,2,1]}}"
 
