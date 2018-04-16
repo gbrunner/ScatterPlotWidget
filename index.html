@@ -103,7 +103,7 @@
               return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
             }
 
-            var isUrl = "https://usfs-imagery-dev.esriemcs.com/arcgis/rest/services/Hosted/LCMS_NewYork_201804030247038/ImageServer" 
+            var isUrl = "https://usfs-imagery-dev.esriemcs.com/arcgis/rest/services/Hosted/LCMS_Texas_201804030025038/ImageServer" 
 		//"https://landsat.arcgis.com/arcgis/rest/services/LandsatGLS/MS/ImageServer"
 			//"http://wju.esri.com:6080/arcgis/rest/services/demo/LandsatPortland/ImageServer";
             var renderingRule = "{\"rasterFunction\":\"ExtractBand\",\"rasterFunctionArguments\":{\"bandIds\":[1,2,3]}}"
@@ -116,7 +116,7 @@
             })) {
                 corsEnabledServers.push(imageServiceAuthority);
             }
-            var initExtent = new Extent(-8440918.2763, 5302326.0589, -8382298.2763, 5326956.0589, new SpatialReference(3857));
+            var initExtent = new Extent( -1.08729582763E7,3706746.0588999996, -1.08260982763E7, 3731376.0588999996, new SpatialReference(3857));
 
             var map = new Map("mapCanvas", {
                 extent: initExtent,
