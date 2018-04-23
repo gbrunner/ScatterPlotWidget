@@ -103,8 +103,7 @@
               return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
             }
 
-            var isUrl = "https://usfs-imagery-dev.esriemcs.com/arcgis/rest/services/Hosted/HR_Georgia_201804120130124/ImageServer" 
-		//"https://landsat.arcgis.com/arcgis/rest/services/LandsatGLS/MS/ImageServer"
+            var isUrl = "https://landsat.arcgis.com/arcgis/rest/services/LandsatGLS/MS/ImageServer"
 			//"http://wju.esri.com:6080/arcgis/rest/services/demo/LandsatPortland/ImageServer";
             var renderingRule = "{\"rasterFunction\":\"ExtractBand\",\"rasterFunctionArguments\":{\"bandIds\":[0,1,2]}}" //[0,1,2]
 
@@ -116,8 +115,8 @@
             })) {
                 corsEnabledServers.push(imageServiceAuthority);
             }
-	    var initExtent = new Extent(-9456933.486400,3953811.098500, -9339723.486400, 4003071.098500, new SpatialReference(3857));
-            //var initExtent = new Extent( -1.08729582763E7,3706746.0588999996, -1.08260982763E7, 3731376.0588999996, new SpatialReference(3857));
+	    //var initExtent = new Extent(-9456933.486400,3953811.098500, -9339723.486400, 4003071.098500, new SpatialReference(3857));
+            var initExtent = new Extent( -1.08729582763E7,3706746.0588999996, -1.08260982763E7, 3731376.0588999996, new SpatialReference(3857));
 
             var map = new Map("mapCanvas", {
                 extent: initExtent,
